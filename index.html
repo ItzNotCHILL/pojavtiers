@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pojav Tierlist - MCTiers Point System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-main: #0a0304;
+      --bg-card: #14080a;
+      --bg-card-hover: #1c0a0d;
+      --bg-nav: #0f0507;
+      --border-color: #381216;
+      --accent-red: #ff2a4b;
+      --accent-red-glow: rgba(255, 42, 75, 0.4);
+      --accent-gold: #f1c40f;
+      --accent-discord: #5865F2;
+      --accent-discord-glow: rgba(88, 101, 242, 0.4);
+      --text-muted: #9b7e83;
+      
+      /* Tier Colors */
+      --color-ht: #ffd700;
+      --color-lt: #a0a0a0;
+      
+      /* Region Colors */
+      --region-as: #ff4757;
+      --region-na: #1e90ff;
+      --region-eu: #2ed573;
+      --region-sa: #ffa500;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Page View Transitions */
+    .page-section {
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: none;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .page-section.active-page {
+      display: block;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    /* Modal Animation Transitions */
+    .modal {
+      display: flex;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal.active-modal {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: #14080a;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px var(--accent-red-glow);
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal.active-modal .modal-content {
+      transform: scale(1) translateY(0);
+    }
+
+    /* Header & Navigation */
+    header {
+      background-color: var(--bg-nav);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .brand-logo-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: #1a080b;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 0 10px var(--accent-red-glow);
+    }
+
+    .brand-logo-wrap i {
+      font-size: 1.2rem;
+      color: var(--accent-red);
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #fff;
+      text-shadow: 0 0 8px var(--accent-red);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: #1a080b;
+      color: #e2e8f0;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: #280d12;
+      border-color: var(--accent-red);
+      box-shadow: 0 0 10px var(--accent-red-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-discord {
+      background: rgba(88, 101, 242, 0.15);
+      border-color: var(--accent-discord);
+      color: #fff;
+    }
+
+    .btn-discord:hover {
+      background: var(--accent-discord);
+      box-shadow: 0 0 12px var(--accent-discord-glow);
+    }
+
+    .btn-editor {
+      background: rgba(255, 42, 75, 0.15);
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .btn-editor:hover {
+      background: var(--accent-red);
+      color: #fff;
+    }
+
+    .btn-restricted {
+      display: none;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1300px;
+      width: 100%;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Hero Section */
+    .hero-container {
+      max-width: 1000px;
+      margin: 3rem auto 2rem auto;
+      padding: 0 1.5rem;
+      text-align: left;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 42, 75, 0.1);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-size: 3.2rem;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+      font-family: monospace;
+      color: #fff;
+    }
+
+    .hero-title span {
+      color: var(--accent-red);
+      text-shadow: 0 0 15px var(--accent-red-glow);
+      cursor: pointer;
+    }
+
+    .hero-subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 650px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .hero-search-wrap {
+      position: relative;
+      max-width: 480px;
+      margin-bottom: 2rem;
+    }
+
+    .hero-search-wrap i {
+      position: absolute;
+      left: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .hero-search-wrap input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      padding: 0.85rem 1rem 0.85rem 3rem;
+      color: #fff;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .hero-search-wrap input:focus {
+      border-color: var(--accent-red);
+      box-shadow: 0 0 15px var(--accent-red-glow);
+    }
+
+    .hero-cta-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+      background: var(--accent-red);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 15px var(--accent-red-glow);
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .btn-hero-primary:hover {
+      background: #e01b3a;
+      transform: translateY(-2px);
+    }
+
+    .btn-hero-discord {
+      background: var(--accent-discord);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 15px var(--accent-discord-glow);
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .btn-hero-discord:hover {
+      background: #4752c4;
+      transform: translateY(-2px);
+    }
+
+    /* Stats & Filters */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: rgba(255, 42, 75, 0.1);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .stat-info .stat-val { font-size: 1.2rem; font-weight: 800; color: #fff; }
+    .stat-info .stat-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+
+    .tabs-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      background: #130709;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover { color: #fff; border-color: var(--accent-red); }
+    .tab-btn.active {
+      border-color: var(--accent-red);
+      background: rgba(255, 42, 75, 0.1);
+      color: #fff;
+      box-shadow: 0 0 10px var(--accent-red-glow);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .search-input-wrap i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .search-input-wrap input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.7rem 1rem 0.7rem 2.5rem;
+      color: #fff;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .search-input-wrap input:focus { border-color: var(--accent-red); }
+
+    .filter-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    /* Table & Rows */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 60px 240px 80px 1fr;
+      padding: 0.8rem 1.2rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .player-row {
+      display: grid;
+      grid-template-columns: 60px 240px 80px 1fr;
+      align-items: center;
+      padding: 0.8rem 1.2rem;
+      border-bottom: 1px solid #1f0b0e;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s;
+      cursor: pointer;
+    }
+
+    .player-row:hover {
+      background: var(--bg-card-hover);
+      transform: translateX(4px);
+    }
+
+    .rank-num { font-weight: 800; color: var(--accent-gold); }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .player-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      image-rendering: pixelated;
+    }
+
+    .player-details .name-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .player-details .name { font-weight: 700; font-size: 0.95rem; }
+    .player-details .points-tag { font-size: 0.75rem; color: var(--accent-gold); font-weight: 700; }
+
+    .region-tag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      width: fit-content;
+      text-transform: uppercase;
+    }
+
+    .region-AS { background: rgba(255, 71, 87, 0.15); color: var(--region-as); border: 1px solid var(--region-as); }
+    .region-NA { background: rgba(30, 144, 255, 0.15); color: var(--region-na); border: 1px solid var(--region-na); }
+    .region-EU { background: rgba(46, 213, 115, 0.15); color: var(--region-eu); border: 1px solid var(--region-eu); }
+    .region-SA { background: rgba(255, 165, 0, 0.15); color: var(--region-sa); border: 1px solid var(--region-sa); }
+
+    .tier-badges-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tier-badge {
+      background: #0f0507;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 44px;
+    }
+
+    .tier-badge i { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 2px; }
+    .tier-badge .val { font-size: 0.7rem; font-weight: 800; }
+
+    .tier-ht { color: var(--color-ht); border-color: rgba(255, 215, 0, 0.3); }
+    .tier-lt { color: var(--color-lt); border-color: rgba(160, 160, 160, 0.3); }
+
+    /* Dashboard UI */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .dash-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1.2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .dash-player-left { display: flex; align-items: center; gap: 12px; }
+
+    .btn-icon-edit {
+      background: rgba(255, 42, 75, 0.15);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Modal Form UI */
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group { margin-bottom: 1rem; text-align: left; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .form-group input, .form-group select {
+      width: 100%;
+      background: #0a0304;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.6rem;
+      color: #fff;
+      outline: none;
+    }
+
+    .grid-tiers-select { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; }
+
+    /* Profile Modal */
+    .profile-card-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1rem;
+    }
+
+    .profile-avatar-large {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      border: 2px solid var(--accent-red);
+      box-shadow: 0 0 15px var(--accent-red-glow);
+      margin-bottom: 0.75rem;
+      image-rendering: pixelated;
+    }
+
+    .profile-name { font-size: 1.4rem; font-weight: 800; color: #fff; }
+    .profile-meta-row { display: flex; gap: 12px; margin-top: 0.5rem; align-items: center; }
+    .profile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 1rem; }
+
+    .profile-tier-item {
+      background: #0a0304;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .auth-tab-group {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1rem;
+    }
+
+    .auth-tab-btn {
+      flex: 1;
+      padding: 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .auth-tab-btn.active {
+      color: #fff;
+      border-bottom: 2px solid var(--accent-discord);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand" onclick="navigateTo('home')">
+      <div class="brand-logo-wrap">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+      <div class="brand-title">POJAV TIERLIST</div>
+    </div>
+
+    <div class="nav-actions">
+      <button class="btn" onclick="navigateTo('home')"><i class="fa-solid fa-house"></i> Home</button>
+      <button class="btn" onclick="navigateTo('tierlist')"><i class="fa-solid fa-ranking-star"></i> Tiers</button>
+      <button class="btn" id="viewToggleBtn" onclick="navigateTo('dashboard')">
+        <i class="fa-solid fa-gauge"></i> Dashboard
+      </button>
+
+      <!-- Discord Join Link Button -->
+      <a class="btn btn-discord" href="https://discord.gg/JxX8Rj4Dvf" target="_blank" rel="noopener">
+        <i class="fa-brands fa-discord"></i> Discord
+      </a>
+
+      <!-- Admin Permissions (Owner barshan777 only) -->
+      <button class="btn btn-editor btn-restricted" id="permsBtn" onclick="openModal('permsModal')">
+        <i class="fa-solid fa-user-shield"></i> Permissions
+      </button>
+
+      <!-- Discord Auth Switcher -->
+      <button class="btn btn-discord" id="authBtn" onclick="openAuthModal()">
+        <i class="fa-brands fa-discord"></i> Sign In with Discord
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- PAGE 1: HERO / LANDING PAGE -->
+    <div id="homeView" class="page-section active-page">
+      <div class="hero-container">
+        <div class="hero-badge"><i class="fa-solid fa-bolt"></i> Official MCTiers Scoring Matrix</div>
+        <h1 class="hero-title">
+          The <span onclick="navigateTo('tierlist')">Pojav Tierlist</span> Competitive Rankings
+        </h1>
+        <p class="hero-subtitle">
+          Official competitive player points scale based on MCTiers standardized point distribution across all major Minecraft PvP modes.
+        </p>
+
+        <div class="hero-search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="heroSearchInput" placeholder="Search player..." onkeydown="if(event.key==='Enter') executeHeroSearch()">
+        </div>
+
+        <div class="hero-cta-group">
+          <button class="btn-hero-primary" onclick="navigateTo('tierlist')">
+            Browse rankings <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <a class="btn-hero-discord" href="https://discord.gg/JxX8Rj4Dvf" target="_blank" rel="noopener">
+            <i class="fa-brands fa-discord"></i> Join Discord Server
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 2: PUBLIC TIERLIST VIEW -->
+    <div id="tierlistView" class="page-section">
+      <!-- Statistics Bar -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-info">
+            <div class="stat-val" id="statPlayerCount">0</div>
+            <div class="stat-lbl">Ranked Players</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+          <div class="stat-info">
+            <div class="stat-val" id="statTiersCount">0</div>
+            <div class="stat-lbl">Tiers Recorded</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-earth-americas"></i></div>
+          <div class="stat-info">
+            <div class="stat-val" id="statTopRegion">AS</div>
+            <div class="stat-lbl">Top Region</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs-bar" id="categoryTabs">
+        <!-- Dynamic Tabs -->
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-input-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" placeholder="Search players..." onkeyup="renderPublicList()">
+        </div>
+
+        <select class="filter-select" id="regionFilter" onchange="renderPublicList()">
+          <option value="ALL">All Regions</option>
+          <option value="AS">AS (Asia)</option>
+          <option value="NA">NA (North America)</option>
+          <option value="EU">EU (Europe)</option>
+          <option value="SA">SA (South America)</option>
+        </select>
+
+        <select class="filter-select" id="sortByFilter" onchange="renderPublicList()">
+          <option value="points">Sort: Total Points</option>
+          <option value="alphabetical">Sort: Alphabetical</option>
+        </select>
+
+        <a class="btn btn-discord" href="https://discord.gg/JxX8Rj4Dvf" target="_blank" rel="noopener" style="margin-left:auto;">
+          <i class="fa-brands fa-discord"></i> Discord Community
+        </a>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <div>RANK</div>
+          <div>PLAYER</div>
+          <div>REGION</div>
+          <div>TIERS</div>
+        </div>
+        <div id="playerListContainer">
+          <!-- Rows injected dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 3: STAFF DASHBOARD VIEW -->
+    <div id="dashboardView" class="page-section">
+      <div class="dashboard-header">
+        <div>
+          <h2>STAFF DASHBOARD</h2>
+          <p style="font-size:0.85rem; color:var(--text-muted);" id="userRoleStatus">Signed in as viewer</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-editor btn-restricted" onclick="openAddPlayerModal()">
+            <i class="fa-solid fa-plus"></i> Add Player
+          </button>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="dashSearchInput" placeholder="Search players..." onkeyup="renderDashboardList()">
+        </div>
+      </div>
+
+      <div id="dashPlayerList" style="margin-top: 1rem;">
+        <!-- Dash rows injected dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <!-- AUTHENTICATION MODAL (Password System) -->
+  <div class="modal" id="authModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="authModalTitle">DISCORD AUTHENTICATION</h3>
+        <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="closeModal('authModal')"></i>
+      </div>
+
+      <div class="auth-tab-group">
+        <button class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthMode('login')">Sign In</button>
+        <button class="auth-tab-btn" id="tabSignupBtn" onclick="switchAuthMode('signup')">Sign Up</button>
+      </div>
+
+      <div class="form-group">
+        <label>Discord Username</label>
+        <input type="text" id="authDiscordUser" placeholder="e.g. barshan777">
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="authPassword" placeholder="Enter password">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('authModal')">Cancel</button>
+        <button class="btn btn-discord" id="authSubmitBtn" onclick="processAuthSubmit()">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAYER PROFILE MODAL -->
+  <div class="modal" id="profileModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>PLAYER PROFILE</h3>
+        <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="closeModal('profileModal')"></i>
+      </div>
+      <div id="profileModalBody">
+        <!-- Injected dynamic content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT PLAYER MODAL -->
+  <div class="modal" id="playerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">ADD PLAYER</h3>
+        <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="closeModal('playerModal')"></i>
+      </div>
+
+      <div class="form-group">
+        <label>Minecraft Username</label>
+        <input type="text" id="formUsername" placeholder="e.g. ItzNotChill777">
+      </div>
+
+      <div class="form-group">
+        <label>Region</label>
+        <select id="formRegion">
+          <option value="AS">AS</option>
+          <option value="NA">NA</option>
+          <option value="EU">EU</option>
+          <option value="SA">SA</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Tiers per category</label>
+        <div class="grid-tiers-select" id="tierSelectGrid">
+          <!-- Tier options dynamic injection -->
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('playerModal')">Cancel</button>
+        <button class="btn btn-editor" onclick="savePlayer()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OWNER PERMISSIONS MODAL (Owner barshan777 exclusive) -->
+  <div class="modal" id="permsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Owner Control - Manage Permissions</h3>
+        <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="closeModal('permsModal')"></i>
+      </div>
+
+      <div class="form-group">
+        <label>Add Authorized Player Username (Discord/Minecraft)</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="newPermUsername" placeholder="e.g. Player123">
+          <button class="btn btn-editor" onclick="addPermUser()">Grant</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Permitted Editors List</label>
+        <div id="permsUserList" style="background:#0a0304; border:1px solid var(--border-color); border-radius:6px; padding:0.5rem; max-height:180px; overflow-y:auto;">
+          <!-- Permitted list injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const OWNER_USERNAME = "barshan777";
+
+    const CATEGORIES = [
+      { id: 'overall', name: 'OVERALL', icon: 'fa-trophy' },
+      { id: 'sword', name: 'SWORD', icon: 'fa-hand-back-fist' },
+      { id: 'axe', name: 'AXE', icon: 'fa-gavel' },
+      { id: 'pot', name: 'POT', icon: 'fa-flask' },
+      { id: 'nethop', name: 'NETHOP', icon: 'fa-fire' },
+      { id: 'smp', name: 'SMP', icon: 'fa-globe' },
+      { id: 'uhc', name: 'UHC', icon: 'fa-heart' },
+      { id: 'mace', name: 'MACE', icon: 'fa-hammer' },
+      { id: 'crystal', name: 'CRYSTAL', icon: 'fa-gem' }
+    ];
+
+    const TIER_OPTIONS = ['Unranked', 'LT5', 'HT5', 'LT4', 'HT4', 'LT3', 'HT3', 'LT2', 'HT2', 'LT1', 'HT1'];
+
+    const TIER_POINTS = {
+      'HT1': 60, 'LT1': 45,
+      'HT2': 35, 'LT2': 25,
+      'HT3': 18, 'LT3': 12,
+      'HT4': 8,  'LT4': 5,
+      'HT5': 3,  'LT5': 1,
+      'Unranked': 0
+    };
+
+    let activeCategory = 'overall';
+    let editingPlayerId = null;
+    let authMode = 'login';
+
+    let players = JSON.parse(localStorage.getItem('pojav_players_mctiers')) || [
+      {
+        id: '1',
+        name: 'ItzNotChill777',
+        region: 'AS',
+        tiers: { sword: 'HT1', axe: 'HT2', pot: 'HT1', nethop: 'LT1', smp: 'HT3', uhc: 'HT2', mace: 'LT2', crystal: 'HT3' }
+      },
+      {
+        id: '2',
+        name: 'AhixPlayz',
+        region: 'NA',
+        tiers: { sword: 'LT1', axe: 'HT1', pot: 'LT2', nethop: 'LT3', uhc: 'HT1', crystal: 'HT2' }
+      },
+      {
+        id: '3',
+        name: 'Craxven',
+        region: 'EU',
+        tiers: { sword: 'HT2', crystal: 'LT3', smp: 'HT4' }
+      }
+    ];
+
+    /* External Storage Key for User Passwords & Discord Usernames */
+    let userDatabase = JSON.parse(localStorage.getItem('pojav_user_credentials')) || {};
+
+    let allowedUsers = JSON.parse(localStorage.getItem('pojav_allowedUsers')) || [OWNER_USERNAME];
+    if (!allowedUsers.map(u => u.toLowerCase()).includes(OWNER_USERNAME.toLowerCase())) {
+      allowedUsers.unshift(OWNER_USERNAME);
+    }
+
+    let currentDiscordUser = localStorage.getItem('pojav_currentDiscordUser') || null;
+
+    /* Password Encrypter (Hash) Helper */
+    function hashPassword(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return 'hash_' + Math.abs(hash);
+    }
+
+    function calculatePlayerPoints(player) {
+      let total = 0;
+      Object.values(player.tiers || {}).forEach(t => {
+        total += TIER_POINTS[t] || 0;
+      });
+      return total;
+    }
+
+    window.onload = function() {
+      buildTabs();
+      buildTierSelectForm();
+      updateStatisticsBar();
+      renderPublicList();
+      renderDashboardList();
+      updateAuthUI();
+    };
+
+    /* Navigation System */
+    function navigateTo(pageId) {
+      const views = {
+        'home': document.getElementById('homeView'),
+        'tierlist': document.getElementById('tierlistView'),
+        'dashboard': document.getElementById('dashboardView')
+      };
+
+      Object.keys(views).forEach(key => {
+        views[key].classList.remove('active-page');
+      });
+
+      setTimeout(() => {
+        views[pageId].classList.add('active-page');
+      }, 50);
+    }
+
+    /* Modal Animation Management */
+    function openModal(id) {
+      document.getElementById(id).classList.add('active-modal');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active-modal');
+    }
+
+    function executeHeroSearch() {
+      const val = document.getElementById('heroSearchInput').value;
+      document.getElementById('searchInput').value = val;
+      renderPublicList();
+      navigateTo('tierlist');
+    }
+
+    function buildTabs() {
+      const container = document.getElementById('categoryTabs');
+      container.innerHTML = CATEGORIES.map(cat => `
+        <button class="tab-btn ${cat.id === activeCategory ? 'active' : ''}" onclick="setCategory('${cat.id}')">
+          <i class="fa-solid ${cat.icon}"></i> ${cat.name}
+        </button>
+      `).join('');
+    }
+
+    function setCategory(catId) {
+      activeCategory = catId;
+      buildTabs();
+      renderPublicList();
+    }
+
+    function buildTierSelectForm() {
+      const grid = document.getElementById('tierSelectGrid');
+      grid.innerHTML = CATEGORIES.filter(c => c.id !== 'overall').map(cat => `
+        <div>
+          <label style="font-size:0.75rem;">${cat.name}</label>
+          <select id="select_tier_${cat.id}">
+            ${TIER_OPTIONS.map(opt => `<option value="${opt}">${opt} (${TIER_POINTS[opt]} pts)</option>`).join('')}
+          </select>
+        </div>
+      `).join('');
+    }
+
+    function updateStatisticsBar() {
+      document.getElementById('statPlayerCount').innerText = players.length;
+      let totalTiersLogged = 0;
+      let regionCounts = {};
+
+      players.forEach(p => {
+        Object.values(p.tiers || {}).forEach(val => {
+          if (val && val !== 'Unranked') totalTiersLogged++;
+        });
+        regionCounts[p.region] = (regionCounts[p.region] || 0) + 1;
+      });
+
+      document.getElementById('statTiersCount').innerText = totalTiersLogged;
+
+      let topRegion = 'AS';
+      let maxRegion = 0;
+      Object.keys(regionCounts).forEach(r => {
+        if (regionCounts[r] > maxRegion) {
+          maxRegion = regionCounts[r];
+          topRegion = r;
+        }
+      });
+      document.getElementById('statTopRegion').innerText = topRegion;
+    }
+
+    /* Public View Render */
+    function renderPublicList() {
+      const container = document.getElementById('playerListContainer');
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const selectedRegion = document.getElementById('regionFilter').value;
+      const selectedSort = document.getElementById('sortByFilter').value;
+
+      let filtered = players.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(search);
+        const matchesRegion = (selectedRegion === 'ALL' || p.region === selectedRegion);
+        return matchesSearch && matchesRegion;
+      });
+
+      filtered.sort((a, b) => {
+        if (selectedSort === 'alphabetical') {
+          return a.name.localeCompare(b.name);
+        } else {
+          if (activeCategory === 'overall') {
+            return calculatePlayerPoints(b) - calculatePlayerPoints(a);
+          } else {
+            let scoreA = TIER_POINTS[a.tiers[activeCategory]] || 0;
+            let scoreB = TIER_POINTS[b.tiers[activeCategory]] || 0;
+            return scoreB - scoreA;
+          }
+        }
+      });
+
+      container.innerHTML = filtered.map((player, idx) => {
+        let totalPoints = calculatePlayerPoints(player);
+        let badgesMarkup = '';
+
+        if (activeCategory === 'overall') {
+          badgesMarkup = CATEGORIES.filter(c => c.id !== 'overall').map(cat => {
+            let val = player.tiers[cat.id];
+            if (!val || val === 'Unranked') return '';
+            let isHT = val.startsWith('HT');
+            return `
+              <div class="tier-badge ${isHT ? 'tier-ht' : 'tier-lt'}" title="${cat.name}: ${val} (${TIER_POINTS[val]} pts)">
+                <i class="fa-solid ${cat.icon}"></i>
+                <span class="val">${val}</span>
+              </div>
+            `;
+          }).join('');
+        } else {
+          let val = player.tiers[activeCategory] || 'Unranked';
+          let isHT = val.startsWith('HT');
+          badgesMarkup = `
+            <div class="tier-badge ${isHT ? 'tier-ht' : 'tier-lt'}" style="min-width:70px;">
+              <span class="val" style="font-size:0.85rem;">${val} (${TIER_POINTS[val]} pts)</span>
+            </div>
+          `;
+        }
+
+        let regClass = `region-${player.region || 'NA'}`;
+
+        return `
+          <div class="player-row" onclick="openProfileModal('${player.id}')">
+            <div class="rank-num">#${idx + 1}</div>
+            <div class="player-info">
+              <img class="player-avatar" src="https://mc-heads.net/avatar/${player.name}" alt="">
+              <div class="player-details">
+                <div class="name-wrap">
+                  <span class="name">${player.name}</span>
+                  <span class="points-tag">${totalPoints} pts</span>
+                </div>
+              </div>
+            </div>
+            <div><span class="region-tag ${regClass}">${player.region || 'NA'}</span></div>
+            <div class="tier-badges-grid">${badgesMarkup || '<span style="color:var(--text-muted); font-size:0.8rem;">Unranked</span>'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openProfileModal(id) {
+      const player = players.find(p => p.id === id);
+      if (!player) return;
+
+      const totalPoints = calculatePlayerPoints(player);
+      const body = document.getElementById('profileModalBody');
+
+      let tiersGridMarkup = CATEGORIES.filter(c => c.id !== 'overall').map(cat => {
+        let val = player.tiers[cat.id] || 'Unranked';
+        let pts = TIER_POINTS[val] || 0;
+        let isHT = val.startsWith('HT');
+        let colorStyle = val === 'Unranked' ? 'color:var(--text-muted);' : (isHT ? 'color:var(--color-ht);' : 'color:var(--color-lt);');
+        return `
+          <div class="profile-tier-item">
+            <span style="font-size:0.8rem; font-weight:700;"><i class="fa-solid ${cat.icon}"></i> ${cat.name}</span>
+            <span style="font-size:0.85rem; font-weight:800; ${colorStyle}">${val} <small>(${pts} pts)</small></span>
+          </div>
+        `;
+      }).join('');
+
+      body.innerHTML = `
+        <div class="profile-card-header">
+          <img class="profile-avatar-large" src="https://mc-heads.net/avatar/${player.name}" alt="">
+          <div class="profile-name">${player.name}</div>
+          <div class="profile-meta-row">
+            <span class="region-tag region-${player.region}">${player.region}</span>
+            <span style="font-weight:800; color:var(--accent-gold);">${totalPoints} MCTiers Points</span>
+          </div>
+        </div>
+        <div class="profile-grid">
+          ${tiersGridMarkup}
+        </div>
+      `;
+
+      openModal('profileModal');
+    }
+
+    function renderDashboardList() {
+      const container = document.getElementById('dashPlayerList');
+      const search = document.getElementById('dashSearchInput').value.toLowerCase();
+      const isEditor = currentDiscordUser && allowedUsers.map(u => u.toLowerCase()).includes(currentDiscordUser.toLowerCase());
+
+      let filtered = players.filter(p => p.name.toLowerCase().includes(search));
+
+      container.innerHTML = filtered.map(player => {
+        let tierCount = Object.values(player.tiers || {}).filter(t => t && t !== 'Unranked').length;
+        let totalPoints = calculatePlayerPoints(player);
+        let regClass = `region-${player.region || 'NA'}`;
+
+        return `
+          <div class="dash-row">
+            <div class="dash-player-left">
+              <img class="player-avatar" src="https://mc-heads.net/avatar/${player.name}" alt="">
+              <div class="player-details">
+                <div class="name-wrap">
+                  <span class="name">${player.name}</span>
+                  <span class="points-tag">(${totalPoints} pts)</span>
+                  ${isEditor ? `
+                    <button class="btn-icon-edit" onclick="openEditPlayerModal('${player.id}')">
+                      <i class="fa-solid fa-pen"></i> Edit
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:20px;">
+              <span class="region-tag ${regClass}">${player.region || 'NA'}</span>
+              <span style="font-size:0.85rem; color:var(--text-muted);">${tierCount} tiers</span>
+              ${isEditor ? `
+                <div style="cursor:pointer;" onclick="deletePlayer('${player.id}')">
+                  <i class="fa-solid fa-trash" style="color:var(--accent-red);"></i>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openAddPlayerModal() {
+      editingPlayerId = null;
+      document.getElementById('modalTitle').innerText = 'ADD PLAYER';
+      document.getElementById('formUsername').value = '';
+      document.getElementById('formRegion').value = 'NA';
+      CATEGORIES.filter(c => c.id !== 'overall').forEach(cat => {
+        document.getElementById(`select_tier_${cat.id}`).value = 'Unranked';
+      });
+      openModal('playerModal');
+    }
+
+    function openEditPlayerModal(id) {
+      editingPlayerId = id;
+      const player = players.find(p => p.id === id);
+      if (!player) return;
+
+      document.getElementById('modalTitle').innerText = 'EDIT PLAYER';
+      document.getElementById('formUsername').value = player.name;
+      document.getElementById('formRegion').value = player.region || 'NA';
+
+      CATEGORIES.filter(c => c.id !== 'overall').forEach(cat => {
+        document.getElementById(`select_tier_${cat.id}`).value = player.tiers[cat.id] || 'Unranked';
+      });
+
+      openModal('playerModal');
+    }
+
+    function savePlayer() {
+      const name = document.getElementById('formUsername').value.trim();
+      const region = document.getElementById('formRegion').value;
+
+      if (!name) return alert('Username required');
+
+      let tiersObj = {};
+      CATEGORIES.filter(c => c.id !== 'overall').forEach(cat => {
+        tiersObj[cat.id] = document.getElementById(`select_tier_${cat.id}`).value;
+      });
+
+      if (editingPlayerId) {
+        let player = players.find(p => p.id === editingPlayerId);
+        if (player) {
+          player.name = name;
+          player.region = region;
+          player.tiers = tiersObj;
+        }
+      } else {
+        players.push({
+          id: Date.now().toString(),
+          name,
+          region,
+          tiers: tiersObj
+        });
+      }
+
+      localStorage.setItem('pojav_players_mctiers', JSON.stringify(players));
+      closeModal('playerModal');
+      updateStatisticsBar();
+      renderPublicList();
+      renderDashboardList();
+    }
+
+    function deletePlayer(id) {
+      if (!confirm('Are you sure you want to delete this player?')) return;
+      players = players.filter(p => p.id !== id);
+      localStorage.setItem('pojav_players_mctiers', JSON.stringify(players));
+      updateStatisticsBar();
+      renderPublicList();
+      renderDashboardList();
+    }
+
+    /* Auth & Login Modal Controls */
+    function openAuthModal() {
+      if (currentDiscordUser) {
+        currentDiscordUser = null;
+        localStorage.removeItem('pojav_currentDiscordUser');
+        updateAuthUI();
+      } else {
+        document.getElementById('authDiscordUser').value = '';
+        document.getElementById('authPassword').value = '';
+        switchAuthMode('login');
+        openModal('authModal');
+      }
+    }
+
+    function switchAuthMode(mode) {
+      authMode = mode;
+      document.getElementById('tabLoginBtn').classList.toggle('active', mode === 'login');
+      document.getElementById('tabSignupBtn').classList.toggle('active', mode === 'signup');
+      document.getElementById('authSubmitBtn').innerText = mode === 'login' ? 'Sign In' : 'Register Account';
+    }
+
+    function processAuthSubmit() {
+      const username = document.getElementById('authDiscordUser').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+
+      if (!username || !password) {
+        return alert('Please enter both Discord Username and Password.');
+      }
+
+      const lowerUsername = username.toLowerCase();
+      const hashedPassword = hashPassword(password);
+
+      if (authMode === 'signup') {
+        if (userDatabase[lowerUsername]) {
+          return alert('Account with this Discord Username already exists. Please Sign In.');
+        }
+
+        userDatabase[lowerUsername] = {
+          username: username,
+          password: hashedPassword,
+          registeredAt: new Date().toISOString()
+        };
+
+        localStorage.setItem('pojav_user_credentials', JSON.stringify(userDatabase));
+        currentDiscordUser = username;
+        localStorage.setItem('pojav_currentDiscordUser', currentDiscordUser);
+
+        closeModal('authModal');
+        updateAuthUI();
+        alert('Account created successfully! You are now signed in.');
+      } else {
+        const userAccount = userDatabase[lowerUsername];
+
+        if (!userAccount) {
+          return alert('Account not found. Please Sign Up first.');
+        }
+
+        if (userAccount.password !== hashedPassword) {
+          return alert('Incorrect password. Please try again.');
+        }
+
+        currentDiscordUser = userAccount.username;
+        localStorage.setItem('pojav_currentDiscordUser', currentDiscordUser);
+
+        closeModal('authModal');
+        updateAuthUI();
+      }
+    }
+
+    function updateAuthUI() {
+      const authBtn = document.getElementById('authBtn');
+      const restrictedBtns = document.querySelectorAll('.btn-restricted');
+      const roleText = document.getElementById('userRoleStatus');
+
+      const isOwner = currentDiscordUser && currentDiscordUser.toLowerCase() === OWNER_USERNAME.toLowerCase();
+      const isEditor = currentDiscordUser && allowedUsers.map(u => u.toLowerCase()).includes(currentDiscordUser.toLowerCase());
+
+      if (currentDiscordUser) {
+        authBtn.innerHTML = `<i class="fa-brands fa-discord"></i> ${currentDiscordUser} (Sign Out)`;
+        if (isOwner) {
+          restrictedBtns.forEach(b => b.style.display = 'inline-flex');
+          roleText.innerText = `Signed in as Owner (${currentDiscordUser})`;
+        } else if (isEditor) {
+          restrictedBtns.forEach(b => {
+            if (b.id === 'permsBtn') b.style.display = 'none';
+            else b.style.display = 'inline-flex';
+          });
+          roleText.innerText = `Signed in as Permitted Editor (${currentDiscordUser})`;
+        } else {
+          restrictedBtns.forEach(b => b.style.display = 'none');
+          roleText.innerText = `Signed in as Viewer (${currentDiscordUser})`;
+        }
+      } else {
+        authBtn.innerHTML = `<i class="fa-brands fa-discord"></i> Sign In with Discord`;
+        restrictedBtns.forEach(b => b.style.display = 'none');
+        roleText.innerText = `Signed in as Viewer`;
+      }
+
+      renderPermsList();
+      renderDashboardList();
+    }
+
+    function addPermUser() {
+      const input = document.getElementById('newPermUsername');
+      const username = input.value.trim();
+      if (username && !allowedUsers.map(u => u.toLowerCase()).includes(username.toLowerCase())) {
+        allowedUsers.push(username);
+        localStorage.setItem('pojav_allowedUsers', JSON.stringify(allowedUsers));
+        input.value = '';
+        renderPermsList();
+        updateAuthUI();
+      }
+    }
+
+    function removePermUser(username) {
+      if (username.toLowerCase() === OWNER_USERNAME.toLowerCase()) return alert('Cannot remove primary owner barshan777');
+      allowedUsers = allowedUsers.filter(u => u.toLowerCase() !== username.toLowerCase());
+      localStorage.setItem('pojav_allowedUsers', JSON.stringify(allowedUsers));
+      renderPermsList();
+      updateAuthUI();
+    }
+
+    function renderPermsList() {
+      const container = document.getElementById('permsUserList');
+      container.innerHTML = allowedUsers.map(user => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #1f0b0e; font-size:0.85rem;">
+          <span>${user} ${user.toLowerCase() === OWNER_USERNAME.toLowerCase() ? '<strong style="color:var(--accent-red);">(Owner)</strong>' : ''}</span>
+          ${user.toLowerCase() !== OWNER_USERNAME.toLowerCase() ? `<i class="fa-solid fa-trash" style="color:var(--accent-red); cursor:pointer;" onclick="removePermUser('${user}')"></i>` : ''}
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
